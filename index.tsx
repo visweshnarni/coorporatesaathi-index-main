@@ -42,6 +42,44 @@ document.addEventListener('DOMContentLoaded', () => {
         mobileMenu.classList.toggle('hidden');
     });
 
+    // --- Desktop Dropdown Menus ---
+    const schemesMenuBtn = document.getElementById('schemes-menu-btn');
+    const schemesMenu = document.getElementById('schemes-menu');
+    const servicesMenuBtn = document.getElementById('services-menu-btn');
+    const servicesMenu = document.getElementById('services-menu');
+
+    const dropdowns = [
+        { btn: schemesMenuBtn, menu: schemesMenu },
+        { btn: servicesMenuBtn, menu: servicesMenu }
+    ];
+
+    dropdowns.forEach(dropdown => {
+        if (dropdown.btn && dropdown.menu) {
+            dropdown.btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // Hide other dropdowns
+                dropdowns.forEach(otherDropdown => {
+                    if (otherDropdown.menu !== dropdown.menu) {
+                        otherDropdown.menu.classList.add('hidden');
+                    }
+                });
+                // Toggle current dropdown
+                dropdown.menu.classList.toggle('hidden');
+            });
+        }
+    });
+
+    // Close dropdowns when clicking outside
+    window.addEventListener('click', (e) => {
+        dropdowns.forEach(dropdown => {
+            if (dropdown.btn && dropdown.menu && !dropdown.menu.classList.contains('hidden')) {
+                 if (!dropdown.btn.contains(e.target as Node) && !dropdown.menu.contains(e.target as Node)) {
+                    dropdown.menu.classList.add('hidden');
+                 }
+            }
+        });
+    });
+
     // --- Header Shadow on Scroll ---
     const header = document.getElementById('header');
     window.addEventListener('scroll', () => {
@@ -156,4 +194,117 @@ document.addEventListener('DOMContentLoaded', () => {
         (contactForm as HTMLFormElement).reset();
     });
 
+    // --- Footer See More Toggle ---
+    const seeMoreBtn = document.getElementById('see-more-btn');
+    const moreFooterLinks = document.getElementById('more-footer-links');
+
+    if (seeMoreBtn && moreFooterLinks) {
+        seeMoreBtn.addEventListener('click', () => {
+            const isHidden = moreFooterLinks.classList.toggle('hidden');
+            if (isHidden) {
+                seeMoreBtn.textContent = 'See More';
+            } else {
+                seeMoreBtn.textContent = 'See Less';
+            }
+        });
+    }
+
+    // --- Process Section Animation ---
+    const processSection = document.getElementById('process');
+    if (processSection) {
+        const steps = Array.from(processSection.querySelectorAll('.process-step')) as HTMLElement[];
+        const lines = Array.from(processSection.querySelectorAll('.process-line-progress')) as HTMLElement[];
+        const cards = Array.from(processSection.querySelectorAll('.process-card')) as HTMLElement[];
+
+        let currentStep = -1;
+        let animationInterval: number | null = null;
+        let isPausedByUser = false;
+        const animationSpeed = 3000; // 3 seconds per step
+
+        const setActiveStep = (index: number) => {
+            // Reset all active states first
+            steps.forEach(s => s.classList.remove('active'));
+            lines.forEach(l => l.classList.remove('active'));
+            cards.forEach(c => c.classList.remove('active'));
+            
+            if (index >= 0 && index < steps.length) {
+                // Activate the specific card for the current step
+                cards[index].classList.add('active');
+
+                // Activate steps cumulatively
+                for (let i = 0; i <= index; i++) {
+                    if (steps[i]) {
+                        steps[i].classList.add('active');
+                    }
+                }
+
+                // Activate lines cumulatively
+                for (let i = 0; i < index; i++) {
+                    if (lines[i]) {
+                        lines[i].classList.add('active');
+                    }
+                }
+            }
+            currentStep = index;
+        };
+        
+        const advanceStep = () => {
+            if (isPausedByUser) return;
+            let nextStep = currentStep + 1;
+            if (nextStep >= steps.length) {
+                nextStep = 0; // Loop back to the beginning
+            }
+            setActiveStep(nextStep);
+        };
+
+        const startAnimation = () => {
+            if (animationInterval) clearInterval(animationInterval);
+            if (isPausedByUser) return;
+            // Run first step immediately, then start interval
+            advanceStep();
+            animationInterval = window.setInterval(advanceStep, animationSpeed);
+        };
+
+        const stopAnimation = () => {
+            if (animationInterval) {
+                clearInterval(animationInterval);
+                animationInterval = null;
+            }
+        };
+        
+        // Click handlers to pause and manually select a step
+        [...steps, ...cards].forEach((element, index) => {
+            // Map card index back to its corresponding step index
+            const stepIndex = index % steps.length;
+            
+            element.addEventListener('click', () => {
+                isPausedByUser = true;
+                stopAnimation();
+                setActiveStep(stepIndex);
+            });
+        });
+
+        // Resume animation on mouse leave if it was paused by user
+        processSection.addEventListener('mouseleave', () => {
+            if (isPausedByUser) {
+                isPausedByUser = false;
+                startAnimation();
+            }
+        });
+
+        // Observer to play/pause animation based on section visibility
+        const processObserver = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+                if (!animationInterval && !isPausedByUser) {
+                   startAnimation();
+                }
+            } else {
+                stopAnimation();
+            }
+        }, {
+            threshold: 0.4 
+        });
+        
+        processObserver.observe(processSection);
+    }
 });
