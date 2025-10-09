@@ -141,3 +141,50 @@ body {
   border-color: rgba(139, 92, 246, 0.5);
   box-shadow: 0 0 25px rgba(139, 92, 246, 0.2);
 }
+/* Refined Styling for smaller, rounded-corner inputs */
+.contact-form-input {
+    /* --- Base Styles (for Light Mode) --- */
+    display: block;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    
+    /* Key Light Mode Changes: */
+    color: #495057; /* Dark text for readability */
+    background-color: #f8f9fa; /* Very light grey/off-white background */
+    border: 1px solid #ced4da; /* Light, subtle border */
+    
+    background-clip: padding-box;
+    border-radius: 0.5rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+/* Focus state for better UX in Light Mode */
+.contact-form-input:focus {
+    color: #495057;
+    background-color: #ffffff; /* White background on focus */
+    border-color: #8b5cf6; /* Brand purple on focus */
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(139, 92, 246, 0.4); /* Purple glow on focus */
+}
+
+/* --- Dark Mode Styles (Activated by .dark prefix) --- */
+/* These styles will override the light mode ones when dark mode is active */
+.dark .contact-form-input {
+    background-color: #3f4258; /* Dark grey background */
+    border-color: #4a4d64;
+    color: #e0e0e0; /* Light text */
+}
+
+.dark .contact-form-input:focus {
+    background-color: #33364c;
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 0.2rem rgba(139, 92, 246, 0.4);
+}
+
+/* Ensure the textarea matches the input fields' styling and default height */
+textarea.contact-form-input {
+    min-height: calc(1.5em + 1.5rem + 2px); 
+    line-height: 1.5;
+}
